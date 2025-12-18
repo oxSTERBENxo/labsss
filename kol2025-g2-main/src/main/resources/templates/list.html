@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ski Slope List</title>
+</head>
+<body>
+
+<div>
+    <!-- The form below should invoke the method SkiSlopeController.listAll -->
+    <form id="filter-form" th:method="GET" th:action="@{/ski-slopes}">
+        <label for="name">Slope Name</label>
+        <input id="name" type="text" name="name" th:value="${param.name}"/>
+        <input type="hidden" name="pageNum" th:value="${pageNum}" />
+        <input type="hidden" name="pageSize" th:value="${pageSize}" />
+
+
+        <label for="length">Slope Length (in meters)</label>
+        <input id="length" type="number" name="length" th:value="${param.length}"/>
+
+        <label for="difficulty">Slope Difficulty</label>
+        <select id="difficulty" name="difficulty">
+            <option value="">All</option>
+            <option th:each="d : ${difficulties}"
+                    th:value="${d}"
+                    th:text="${d}"
+                    th:selected="${param.difficulty != null and param.difficulty[0] == d.toString()}">
+            </option>
+        </select>
+
+        <label for="skiResort">Ski Resort</label>
+        <select id="skiResort" name="skiResort">
+            <option value="">All</option>
+            <option th:each="sr : ${skiResorts}"
+                    th:value="${sr.id}"
+                    th:text="${sr.name}"
+                    th:selected="${param.skiResort != null and param.skiResort[0] == sr.id.toString()}">
+            </option>
+        </select>
+
+        <button id="filter" type="submit">Filter</button>
+    </form>
+
+    <div>
+        <!-- SkiSlopeController.showAdd -->
+        <a th:href="@{/ski-slopes/add}" class="add-item">Add new ski slope</a>
+    </div>
+
+    <!-- empty state -->
+    <div th:if="${#lists.isEmpty(skiSlopes)}">
+        <p>No ski slopes found.</p>
+    </div>
+
+    <table th:if="${!#lists.isEmpty(skiSlopes)}">
+        <tr>
+            <th>Slope Name</th>
+            <th>Length</th>
+            <th>Difficulty</th>
+            <th>Ski Resort</th>
+            <th>Open/Closed</th>
+            <th>Actions</th>
+        </tr>
+
+        <!-- For each ski slope you should have one <tr> like below -->
+        <tr class="item" th:each="slope : ${skiSlopes}">
+            <td th:text="${slope.name}"></td>
+            <td th:text="${slope.length}"></td>
+            <td th:text="${slope.difficulty}"></td>
+            <td th:text="${slope.skiResort.name}"></td>
+            <td th:text="${slope.closed} ? 'CLOSED' : 'OPEN'"></td>
+            <td>
+                <!-- SkiSlopeController.edit -->
+                <a class="edit-item" th:href="@{'/ski-slopes/edit/' + ${slope.id}}">Edit</a>
+
+                <!-- SkiSlopeController.delete -->
+                <form th:action="@{'/ski-slopes/delete/' + ${slope.id}}" method="post">
+                    <button type="submit" class="delete-item">Delete</button>
+                </form>
+
+                <!-- SkiSlopeController.close -->
+                <form th:if="${!slope.closed}"
+                      th:action="@{'/ski-slopes/close/' + ${slope.id}}"
+                      method="post">
+                    <button type="submit" class="close-item">Close</button>
+                </form>
+            </td>
+        </tr>
+    </table>
+
+    <!-- Pagination -->
+    <div th:if="${page != null and page.totalPages > 1}">
+        <a th:if="${page.hasPrevious()}"
+           th:href="@{/ski-slopes(pageNum=${pageNum - 1}, pageSize=${pageSize},
+                              name=${param.name}, length=${param.length},
+                              difficulty=${param.difficulty}, skiResort=${param.skiResort})}">
+            Prev
+        </a>
+
+        <span th:text="'Page ' + ${pageNum} + ' / ' + ${page.totalPages}"></span>
+
+        <a th:if="${page.hasNext()}"
+           th:href="@{/ski-slopes(pageNum=${pageNum + 1}, pageSize=${pageSize},
+                              name=${param.name}, length=${param.length},
+                              difficulty=${param.difficulty}, skiResort=${param.skiResort})}">
+            Next
+        </a>
+    </div>
+
+
+</div>
+
+<div>
+    <ul id="nav">
+        <li><a href="/">Home</a></li>
+        <li><a href="/login">Login</a></li>
+        <li><a href="/logout">Logout</a></li>
+    </ul>
+</div>
+
+</body>
+</html>
+
+
+
